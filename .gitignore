@@ -1,0 +1,56 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# --- Environment ---
+.env
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+.idea/
+.vscode/
+.DS_Store
+
+# --- Pytest / Coverage ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# --- FastAPI / Uvicorn ---
+*.log
+
+# --- Build ---
+build/
+dist/
+site/
+
+# --- Jupyter ---
+.ipynb_checkpoints
+
+# --- MyPy / Pylint ---
+.mypy_cache/
+.pyre/
+.pytype/
+pylint-report.txt
+
+# --- Local configs ---
+*.sqlite3
+*.db
+*.local
