@@ -1,0 +1,32 @@
+# Core
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# Database
+SQLAlchemy==2.0.32
+asyncpg==0.29.0
+alembic==1.13.2
+psycopg2-binary==2.9.9
+
+# Validation / Serialization
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# Utils
+python-dotenv==1.0.1
+email-validator==2.2.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+
+# For search / text utils
+sqlalchemy-searchable==1.4.1
+sqlalchemy-utils==0.41.2
+
+# For background tasks and mail
+aiosmtplib==3.0.1
+jinja2==3.1.4
+
+# Dev tools
+black==24.10.0
+flake8==7.1.1
+isort==5.13.2
