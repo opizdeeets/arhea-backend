@@ -6,6 +6,13 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+import app.models.location
+import app.models.career
+import app.models.contact
+import app.models.media
+import app.models.news
+import app.models.people
+import app.models.taxonomy
 
 # 0) sys.path + .env
 ROOT = Path(__file__).resolve().parents[1]  # корень репозитория
@@ -29,11 +36,6 @@ from app.core.db import Base  # здесь у тебя объявлен declarat
 # ВАЖНО: явно подтянуть модули с моделями, чтобы они зарегистрировались в Base.metadata
 # подстрой пути под своё дерево
 import app.models.project  # если все модели в одном файле
-# или, если разложено:
-# import app.models.media
-# import app.models.project
-# import app.models.person
-# ...
 
 target_metadata = Base.metadata
 

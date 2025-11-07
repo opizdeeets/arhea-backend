@@ -119,7 +119,7 @@ class Project(Base):
     slug = Column(String, nullable=False, unique=True, index=True)
 
     cover_media_id = Column(UUID(as_uuid=True), ForeignKey("media_asset.id", ondelete="SET NULL"))
-    location_id = Column(UUID(as_uuid=True), ForeignKey("location.id", ondelete="SET NULL"))
+    location_id = Column(UUID(as_uuid=True), ForeignKey("location.id", ondelete="SET NULL"), nullable=True)
     type_id = Column(UUID(as_uuid=True), ForeignKey("project_type.id", ondelete="RESTRICT"), nullable=True)
 
     year = Column(Integer, nullable=True)            # старт или референсный год
