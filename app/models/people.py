@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import enum
 from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy import (
-    Column, String, Text, DateTime, ForeignKey, Integer, Boolean, Numeric,
-    CheckConstraint, UniqueConstraint, Index, Computed
-)
-from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
+    Column, String, Text, DateTime, ForeignKey, Integer, Boolean,
+    CheckConstraint, UniqueConstraint, Index)
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from sqlalchemy.types import Enum as SQLEnum
 from app.models.taxonomy import LanguageEnumType
 from app.core.db import Base
 

@@ -8,7 +8,7 @@ from sqlalchemy import (
     CheckConstraint, Index
 )
 
-from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.models.taxonomy import LanguageEnumType
 from app.core.db import Base

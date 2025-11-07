@@ -5,7 +5,7 @@ from uuid import uuid4
 import sqlalchemy as sa
 from sqlalchemy import (
     Column, String, ForeignKey, Integer, 
-    CheckConstraint, UniqueConstraint, Index, func, Computed
+    CheckConstraint, UniqueConstraint, Index, Computed
 )
 from sqlalchemy.dialects.postgresql import UUID
 from app.models.taxonomy import LanguageEnumType
@@ -23,8 +23,9 @@ class Location(Base):
     city_slug = Column(String, nullable=True)  # machine-readable: 'paris', 'moscow'
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
 
-    # Изменение city_slug_lower с использованием Computed
     city_slug_lower = Column(String, sa.Computed("lower(city_slug)"), nullable=False)
+
+
 
     __table_args__ = (
         Index("ix_location_country_code", "country_code"),

@@ -5,8 +5,7 @@ from uuid import uuid4
 
 import sqlalchemy as sa
 from sqlalchemy import (
-    Column, String, Text, DateTime, ForeignKey, Integer, Boolean, Numeric,
-    CheckConstraint, UniqueConstraint, Index, Computed, func,
+    Column, String, DateTime, ForeignKey, UniqueConstraint, Index, Computed, Date
 )
 from sqlalchemy.dialects.postgresql import UUID, CITEXT
 from sqlalchemy.orm import relationship
@@ -44,9 +43,10 @@ class Application(Base):
     files = relationship("MediaAsset", back_populates="applications")
     career = relationship("Career", back_populates="applications")
 
+    created_at_date = Column(Date, Computed("created_at::date"), nullable=False)
 
     __table_args__ = (
-    UniqueConstraint("email", "career_id", sa.text("created_at::date"), name="uq_application_email_per_day"),
-    Index("ix_application_created_at", "created_at"),
-    Index("ix_application_career", "career_id"),
-)
+        UniqueConstraint("email", "career_id", "created_at_date", name="uq_application_email_per_day"),
+        Index("ix_application_created_at", "created_at"),
+        Index("ix_application_career", "career_id"),
+    )
