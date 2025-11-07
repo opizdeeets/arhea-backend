@@ -20,7 +20,13 @@ class ProjectMediaKind(enum.Enum):
     DRAWING = "drawing"
     HERO = "hero"
 
-ProjectMediaKindType = SQLEnum(ProjectMediaKind, name="project_media_kind", native_enum=True)
+ProjectMediaKindType = SQLEnum(
+    ProjectMediaKind,
+    values_callable=lambda enum_cls: [member.value for member in enum_cls],
+    validate_strings=True,
+    name="project_media_kind",
+    native_enum=True,
+)
 
 # ======================================================
 #                     PROJECT TYPE
@@ -219,3 +225,5 @@ class ProjectMedia(Base):
     Index("ix_project_media_kind_order", "project_id", "kind", "order_index"),
     Index("ix_project_media_media", "media_id"),
 )
+
+

@@ -20,7 +20,7 @@ class MediaAsset(Base):
     __tablename__ = "media_asset"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    application_id = Column(UUID(as_uuid=True), ForeignKey("application.id", ondelete="CASCADE"), nullable=True)
+    application_id = Column(UUID(as_uuid=True), ForeignKey("applications.id", ondelete="CASCADE"), nullable=True)
     file_path = Column(String, nullable=False)
     file_name = Column(String, nullable=False)
     mime_type = Column(String, nullable=False)

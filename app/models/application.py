@@ -23,7 +23,13 @@ class ApplicationStatus(enum.Enum):
     REVIEWED = "reviewed"
     ARCHIVED = "archived"
 
-ApplicationStatusType = SQLEnum(ApplicationStatus, name="application_status_enum", native_enum=True)
+ApplicationStatusType = SQLEnum(
+    ApplicationStatus,
+    values_callable=lambda enum_cls: [member.value for member in enum_cls],
+    validate_strings=True,
+    name="application_status_enum",
+    native_enum=True,
+)
 
 class Application(Base):
     __tablename__ = "applications"
@@ -37,13 +43,12 @@ class Application(Base):
     message = Column(String, nullable=True)
     status = Column(ApplicationStatusType, nullable=False, index=True, server_default=sa.text("'new'::application_status_enum"))
 
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.text("now()"))
-    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.text("now()"), onupdate=sa.text("now()"))
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now())
+    created_at_date = Column(Date, nullable=False, server_default=sa.func.current_date())
 
     files = relationship("MediaAsset", back_populates="applications")
     career = relationship("Career", back_populates="applications")
-
-    created_at_date = Column(Date, Computed("created_at::date"), nullable=False)
 
     __table_args__ = (
         UniqueConstraint("email", "career_id", "created_at_date", name="uq_application_email_per_day"),

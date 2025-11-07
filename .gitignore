@@ -54,3 +54,6 @@ pylint-report.txt
 *.sqlite3
 *.db
 *.local
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github\instructions\snyk_rules.instructions.md

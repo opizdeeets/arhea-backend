@@ -10,9 +10,13 @@ class LanguageEnum(enum.Enum):
     RU = "ru"
     TK = "tk"
 
-LanguageEnumType = SQLEnum(LanguageEnum, name="language_enum", native_enum=True)
-
-
+LanguageEnumType = SQLEnum(
+    LanguageEnum,
+    values_callable=lambda enum_cls: [member.value for member in enum_cls],
+    validate_strings=True,
+    name="language_enum",
+    native_enum=True,
+)
 
 
 

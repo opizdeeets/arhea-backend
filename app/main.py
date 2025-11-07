@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 
 app = FastAPI(
-    title="Oguzabat API",
+    title="ARHEA API",
     version="0.1.0",
     debug=True,
 )
