@@ -28,7 +28,7 @@ class Career(Base):
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
     
 
-    application = relationship("Application", back_populates="career")
+    applications = relationship("Application", back_populates="career")
 
     __table_args__ = (
         Index("ix_career_order_index", "order_index"),

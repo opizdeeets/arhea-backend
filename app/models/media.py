@@ -20,6 +20,7 @@ class MediaAsset(Base):
     __tablename__ = "media_asset"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    application_id = Column(UUID(as_uuid=True), ForeignKey("application.id", ondelete="CASCADE"), nullable=True)
     file_path = Column(String, nullable=False)
     file_name = Column(String, nullable=False)
     mime_type = Column(String, nullable=False)
@@ -29,9 +30,8 @@ class MediaAsset(Base):
     height = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.text("now()"))
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.text("now()"), onupdate=sa.text("now()"))
-
     project_media = relationship("ProjectMedia", back_populates="media", cascade="all, delete-orphan")
-    application = relationship("Application", back_populates="files")
+    applications = relationship("Application", back_populates="files")
 
     __table_args__ = (
         Index("ix_media_asset_mime_type", "mime_type"),
@@ -42,7 +42,6 @@ class MediaAsset(Base):
         ),
         Index("ix_media_asset_created_at", "created_at"),
     )
-
 
 
 class MediaAssetI18n(Base):
