@@ -25,7 +25,7 @@ class Career(Base):
     is_published = Column(Boolean, nullable=False, server_default=sa.text("false"))
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
     
-
+    translations = relationship("CareerI18n", back_populates="career", cascade="all, delete-orphan", lazy="selectin")
     applications = relationship("Application", back_populates="career")
 
     __table_args__ = (
@@ -43,6 +43,8 @@ class CareerI18n(Base):
     locale = Column(LanguageEnumType, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
+    
+    career = relationship("Career", back_populates="translations")
 
     __table_args__ = (
         Index("ix_career_i18n_locale", "locale"),

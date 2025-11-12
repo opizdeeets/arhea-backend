@@ -6,13 +6,6 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
-import app.models.location
-import app.models.career
-import app.models.contact
-import app.models.media
-import app.models.news
-import app.models.people
-import app.models.taxonomy
 
 # 0) sys.path + .env
 ROOT = Path(__file__).resolve().parents[1]  # корень репозитория
@@ -31,11 +24,21 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # 2) импортируем Base И ВСЕ МОДЕЛИ
-from app.core.db import Base  # здесь у тебя объявлен declarative_base()
+from app.core.db import Base
+
+import app.models.location
+import app.models.career
+import app.models.contact
+import app.models.media
+import app.models.news
+import app.models.people
+import app.models.taxonomy
+import app.models.project 
+
 
 # ВАЖНО: явно подтянуть модули с моделями, чтобы они зарегистрировались в Base.metadata
 # подстрой пути под своё дерево
-import app.models.project  # если все модели в одном файле
+# если все модели в одном файле
 
 target_metadata = Base.metadata
 

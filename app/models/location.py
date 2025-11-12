@@ -20,22 +20,21 @@ class Location(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     country_code = Column(String(2), nullable=False)  # ISO-3166-1 alpha-2: 'FR', 'RU', 'TM'
-    city_slug = Column(String, nullable=True)  # machine-readable: 'paris', 'moscow'
+    city_slug = Column(String, nullable=False)  # machine-readable: 'paris', 'moscow'
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
 
     city_slug_lower = Column(String, sa.Computed("lower(city_slug)"), nullable=False)
 
-
-
-    __table_args__ = (
-        Index("ix_location_country_code", "country_code"),
-        Index("ix_location_city_slug", "city_slug"),
-        Index("ix_location_order_index", "order_index"),
-        UniqueConstraint("country_code", "city_slug_lower", name="uq_location_country_city_lowercase"),
-        CheckConstraint("country_code ~ '^[A-Z]{2}$'", name="ck_location_country_code_iso2"),
-        CheckConstraint("city_slug ~ '^[a-z0-9a-zÀ-ÿ\\- ]+$'", name="ck_location_city_slug"),
-        CheckConstraint("order_index >= 0", name="ck_location_order_nonneg"),
-    )
+    
+__table_args__ = (
+    Index("ix_location_country_code", "country_code"),
+    Index("ix_location_city_slug", "city_slug"),
+    Index("ix_location_order_index", "order_index"),
+    UniqueConstraint("country_code", "city_slug_lower", name="uq_location_country_city_lowercase"),
+    CheckConstraint("country_code ~ '^[A-Z]{2}$'", name="ck_location_country_code_iso2"),
+    CheckConstraint("city_slug ~ '^[a-z0-9\\- ]+$'", name="ck_location_city_slug"),
+    CheckConstraint("order_index >= 0", name="ck_location_order_nonneg"),
+)
 
 
 class LocationI18n(Base):

@@ -48,12 +48,7 @@ class ContactMessage(Base):
     source = Column(String, nullable=False)
     status = Column(ContactStatusType, nullable=False, index=True, server_default=sa.text("'new'::contact_status_enum"))
 
-    created_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=sa.func.now(),
-        onupdate=sa.func.now(),
-    )
+    created_at = Column( DateTime(timezone=True), nullable=False, server_default=sa.func.now())
     updated_at = Column( DateTime(timezone=True), nullable=False,server_default=sa.func.now(),onupdate=sa.func.now())
     message_hash = Column(String(32), nullable=False)
     created_at_date = Column(Date, nullable=False, server_default=sa.func.current_date())

@@ -23,9 +23,13 @@ class NewsMediaKind(enum.Enum):
     DRAWING = "drawing"
     HERO = "hero"
 
-NewsMediaKindType = SQLEnum(NewsMediaKind, name="news_media_kind", native_enum=True)
-
-
+NewsMediaKindType = SQLEnum(
+    NewsMediaKind,
+    values_callable=lambda enum_cls: [m.value for m in enum_cls],  # храним 'photo'|'drawing'|'hero'
+    validate_strings=True,
+    name="news_media_kind",
+    native_enum=True,
+)
 class News(Base):
     __tablename__ = "news"
 
@@ -62,7 +66,8 @@ class NewsI18n(Base):
 class NewsMedia(Base):
     __tablename__ = "news_media"
 
-    news_id = Column(UUID(as_uuid=True), ForeignKey("news.id", ondelete="CASCADE"), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    news_id = Column(UUID(as_uuid=True), ForeignKey("news.id", ondelete="CASCADE"), nullable=False)
     media_id = Column(UUID(as_uuid=True), ForeignKey("media_asset.id", ondelete="RESTRICT"), nullable=False)
     kind = Column(NewsMediaKindType, nullable=False)
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
@@ -71,9 +76,3 @@ class NewsMedia(Base):
         Index("ix_news_media_kind_order", "news_id", "kind", "order_index"),
         UniqueConstraint("news_id", "media_id", "kind", name="uq_news_media_unique"),  
     )
-
-
-
-
-
-

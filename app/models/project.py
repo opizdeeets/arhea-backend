@@ -193,7 +193,6 @@ class ProjectI18n(Base):
     full_description = Column(Text, nullable=True)
 
     search_vector = Column(TSVECTOR, nullable=False)
-    nullable=False
    
     project = relationship("Project", back_populates="translations")
 

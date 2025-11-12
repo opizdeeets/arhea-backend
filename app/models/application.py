@@ -35,7 +35,7 @@ class Application(Base):
     __tablename__ = "applications"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    career_id = Column(UUID(as_uuid=True), ForeignKey("career.id", ondelete="CASCADE"))
+    career_id = Column(UUID(as_uuid=True), ForeignKey("career.id", ondelete="CASCADE"), nullable=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)    
     email = Column(CITEXT   , nullable=False)
@@ -47,7 +47,7 @@ class Application(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now())
     created_at_date = Column(Date, nullable=False, server_default=sa.func.current_date())
 
-    files = relationship("MediaAsset", back_populates="applications")
+    files = relationship("MediaAsset", back_populates="application")
     career = relationship("Career", back_populates="applications")
 
     __table_args__ = (
