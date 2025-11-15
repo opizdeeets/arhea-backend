@@ -41,6 +41,9 @@ class News(Base):
     is_published = Column(Boolean, nullable=False, server_default=sa.text("false"))
     published_at = Column(DateTime(timezone=True), nullable=True)
 
+    translations = relationship("NewsI18n", back_populates="news")
+    media_items = relationship("NewsMedia", back_populates="news", cascade="all, delete-orphan", lazy="selectin")
+
     __table_args__ = (
         Index("ix_news_published_at", "published_at"),
         Index("ix_news_is_published", "is_published"),
@@ -57,6 +60,8 @@ class NewsI18n(Base):
     full_description = Column(Text, nullable=False)
     search_vector = Column(TSVECTOR, nullable=False)
 
+    news = relationship("News", back_populates="translations")
+
     __table_args__ = (
         Index("ix_news_i18n_locale", "locale"),
         Index("ix_news_i18n_search", "search_vector", postgresql_using="gin"),
@@ -71,6 +76,9 @@ class NewsMedia(Base):
     media_id = Column(UUID(as_uuid=True), ForeignKey("media_asset.id", ondelete="RESTRICT"), nullable=False)
     kind = Column(NewsMediaKindType, nullable=False)
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
+
+    news = relationship("News", back_populates="media_items")
+    media = relationship("MediaAsset")
 
     __table_args__ = (
         Index("ix_news_media_kind_order", "news_id", "kind", "order_index"),

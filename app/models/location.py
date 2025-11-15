@@ -8,6 +8,7 @@ from sqlalchemy import (
     CheckConstraint, UniqueConstraint, Index, Computed
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from app.models.taxonomy import LanguageEnumType
 from app.core.db import Base
 
@@ -25,16 +26,22 @@ class Location(Base):
 
     city_slug_lower = Column(String, sa.Computed("lower(city_slug)"), nullable=False)
 
-    
-__table_args__ = (
-    Index("ix_location_country_code", "country_code"),
-    Index("ix_location_city_slug", "city_slug"),
-    Index("ix_location_order_index", "order_index"),
-    UniqueConstraint("country_code", "city_slug_lower", name="uq_location_country_city_lowercase"),
-    CheckConstraint("country_code ~ '^[A-Z]{2}$'", name="ck_location_country_code_iso2"),
-    CheckConstraint("city_slug ~ '^[a-z0-9\\- ]+$'", name="ck_location_city_slug"),
-    CheckConstraint("order_index >= 0", name="ck_location_order_nonneg"),
-)
+    translations = relationship(
+        "LocationI18n",
+        back_populates="location",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    __table_args__ = (
+        Index("ix_location_country_code", "country_code"),
+        Index("ix_location_city_slug", "city_slug"),
+        Index("ix_location_order_index", "order_index"),
+        UniqueConstraint("country_code", "city_slug_lower", name="uq_location_country_city_lowercase"),
+        CheckConstraint("country_code ~ '^[A-Z]{2}$'", name="ck_location_country_code_iso2"),
+        CheckConstraint("city_slug ~ '^[a-z0-9\\- ]+$'", name="ck_location_city_slug"),
+        CheckConstraint("order_index >= 0", name="ck_location_order_nonneg"),
+    )
 
 
 class LocationI18n(Base):
@@ -47,9 +54,11 @@ class LocationI18n(Base):
     city = Column(String, nullable=False)
     order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
 
+    location = relationship("Location", back_populates="translations")
+
     __table_args__ = (
         Index("ix_location_i18n_locale", "locale"),
         Index("ix_location_i18n_order_index", "order_index"),
     )
 
-        
+

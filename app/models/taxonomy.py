@@ -16,8 +16,4 @@ LanguageEnumType = SQLEnum(
     validate_strings=True,
     name="language_enum",
     native_enum=True,
-)
-
-
-
-
+)   

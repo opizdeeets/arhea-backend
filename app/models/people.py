@@ -37,7 +37,6 @@ class Person(Base):
         Index("ix_person_published", "is_published"),
         CheckConstraint("order_index >= 0", name="ck_person_order_nonneg"),
         CheckConstraint("slug ~ '^[a-z0-9-]+$'", name="ck_person_slug_format"),
-
     )
 
 

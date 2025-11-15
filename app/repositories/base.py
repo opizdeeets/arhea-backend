@@ -18,23 +18,33 @@ class BaseRepository(Generic[T]):
         self.session = session
         self.model = model
 
-
-    def _integrity_code_message(self, pgcode: str) -> tuple[str, int, str]:
-
+    def _integrity_code_message(self, pgcode: str | None) -> tuple[str, int, str]:
         code_map = {
-        "23505": ("unique_violation", 409, "unique constraint violated"),
-        "23503": ("foreign_key_violation", 409, "foreign key constraint violated"),
-        "23502": ("not_null_violation", 400, "null value in column violates not-null constraint"),
-        "23514": ("check_violation", 400, "check constraint violated"),
-    }
-        return code_map.get(pgcode, ("Integrity_error", 409, "Integrity constraint violated"))
+            "23505": ("unique_violation", 409, "unique constraint violated"),
+            "23503": ("foreign_key_violation", 409, "foreign key constraint violated"),
+            "23502": ("not_null_violation", 400, "null value in column violates not-null constraint"),
+            "23514": ("check_violation", 400, "check constraint violated"),
+        }
+        return code_map.get(pgcode, ("integrity_error", 409, "integrity constraint violated"))
+
         
 
-    def _raise_integrity(self, e: IntegrityError, operation: str, payload: dict):
+    async def _raise_integrity(self, e: IntegrityError, operation: str, payload: dict):
         orig = getattr(e, "orig", None); diag = getattr(orig, "diag", None)
         pgcode = getattr(orig, "pgcode", None)
-        constraint = getattr(diag, "constraint_name", None) or getattr(orig, "constraint_naem", None)
+        constraint = getattr(diag, "constraint_name", None) or getattr(orig, "constraint_name", None)
+
                 
+        details = {
+            "model" : self.model.__name__,
+            "operation" : operation, **payload,
+            "pgcode" : pgcode, 
+            "constraint" : constraint,
+        }         
+        code, status, msg = self._integrity_code_message(pgcode)
+        await self.session.rollback() 
+        raise DomainError(code, msg, status=status, details=details, cause=e)
+
 
     def _build_pk_clause(self, id_or_dict: Any):
         pks = inspect(self.model).primary_key
@@ -53,6 +63,7 @@ class BaseRepository(Generic[T]):
 
         return sa.and_(*clauses)
 
+
     async def get(self, id_or_dict: object, options: Seq[ORMOption] | None = None) -> T | None:
         stmt = sa.select(self.model).where(self._build_pk_clause(id_or_dict))
         if options:
@@ -61,6 +72,7 @@ class BaseRepository(Generic[T]):
         result = result.unique()
         return result.scalar_one_or_none()
     
+
     async def list(self, 
         filters: Optional[Mapping[str, Any]] = None, 
         order_by: Optional[Seq[str]] = None, 
@@ -70,14 +82,14 @@ class BaseRepository(Generic[T]):
 
         stmt = sa.select(self.model)
 
-        cols = {c.key: getattr(self.model, c.key) for c in inspect(self.model).mapper.columns}
+        cols = {c.key: getattr(self.moу, c.key) for c in inspect(self.model).mapper.columns}
 
         conditions = []
 
         if filters:
             for k,v in filters.items():
                 if k not in cols:
-                    raise ValueError()
+                    raise ValueError(f"Invalid filter field: {k}")
                 if v is None:
                     continue
                 if isinstance(v, Seq) and not isinstance(v, (str, bytes, bytearray)):
@@ -120,7 +132,7 @@ class BaseRepository(Generic[T]):
         if filters:
             for k,v in filters.items():
                 if k not in cols:
-                    raise ValueError()
+                    raise ValueError(f"Invalid filter field: {k}")
                 if v is None:
                     continue
                 if isinstance(v, Seq) and not isinstance(v, (str, bytes, bytearray)):
@@ -136,25 +148,35 @@ class BaseRepository(Generic[T]):
         stmt = sa.select(sa.exists(inner))
         return bool(await self.session.scalar(stmt))
 
+
     async def create(self, data: Mapping[str, Any]) -> T:
         obj = self.model(**data)
-        self.session.add(obj)
-        await self.session.flush()
+        try:
+            self.session.add(obj)
+            await self.session.flush()
+        except IntegrityError as e: await self._raise_integrity(e, "create", {"data_keys" : list(data.keys())})
         return obj
     
+
     async def update(self, id: Any, data: Mapping[str, Any]) -> Optional[T]:
         obj = await self.get(id)
         if obj is None:
             return None
         for k,v in data.items():
             setattr(obj, k,v)
-        await self.session.flush()    
+        try:    
+            await self.session.flush()    
+        except IntegrityError as e: await self._raise_integrity(e, "update", {"id": id, "data_keys": list(data.keys())})    
         return obj
 
+
     async def delete(self, id: Any) -> bool:
-        obj = await self.get(id) 
+        obj = await self.get(id)
         if obj is None:
-            return False
+            return False 
         self.session.delete(obj)
-        return True
+        try:
+            await self.session.flush()
+        except IntegrityError as e: await self._raise_integrity(e, "delete", {"id": id})
+        return True    
     

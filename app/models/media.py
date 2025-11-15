@@ -28,10 +28,18 @@ class MediaAsset(Base):
     file_size = Column(Integer, nullable=False)
     width = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
+
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.text("now()"))
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=sa.text("now()"), onupdate=sa.text("now()"))
+    
     project_media = relationship("ProjectMedia", back_populates="media", cascade="all, delete-orphan")
     application = relationship("Application", back_populates="files")
+    translations = relationship(
+        "MediaAssetI18n",
+        back_populates="media_asset",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
     __table_args__ = (
         Index("ix_media_asset_mime_type", "mime_type"),
@@ -50,6 +58,8 @@ class MediaAssetI18n(Base):
     media_asset_id = Column(UUID(as_uuid=True), ForeignKey("media_asset.id", ondelete="CASCADE"), primary_key=True, nullable=False)
     locale = Column(LanguageEnumType, primary_key=True)
     alt_text = Column(String, nullable=True)
+
+    media_asset = relationship("MediaAsset", back_populates="translations")
 
     __table_args__ = (
     Index("ix_media_asset_i18n_locale", "locale"),

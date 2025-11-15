@@ -29,90 +29,6 @@ ProjectMediaKindType = SQLEnum(
 )
 
 # ======================================================
-#                     PROJECT TYPE
-# ======================================================
-class ProjectType(Base):
-    __tablename__ = "project_type"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    key = Column(String, nullable=False, unique=True)
-    order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
-    visible = Column(Boolean, nullable=False, server_default=sa.text("true"))
-
-    projects = relationship("Project", back_populates="project_type")
-
-    __table_args__ = (
-        Index("ix_project_type_key", "key"),
-        Index("ix_project_type_visible", "visible"),
-        CheckConstraint("order_index >= 0", name="ck_project_type_order_nonneg"),  
-        CheckConstraint("key ~ '^[a-z0-9_]+$'", name="ck_project_type_key_slug"),  
-
-    )
-
-
-class ProjectTypeI18n(Base):
-    __tablename__ = "project_type_i18n"
-
-    type_id = Column(UUID(as_uuid=True), ForeignKey("project_type.id", ondelete="CASCADE"), primary_key=True)
-    locale = Column(LanguageEnumType, primary_key=True)
-    title = Column(String, nullable=False)
-
-    __table_args__ = (
-        Index("ix_project_type_i18n_locale", "locale"),
-    )
-
-
-# ======================================================
-#                     PROJECT STYLE
-# ======================================================
-class ProjectStyle(Base):
-    __tablename__ = "project_style"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    key = Column(String, nullable=False, unique=True)
-    order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
-    visible = Column(Boolean, nullable=False, server_default=sa.text("true"))
-
-    project_links = relationship("ProjectStyleLink", back_populates="style", cascade="all, delete-orphan", lazy="selectin")
-
-    __table_args__ = (
-        Index("ix_project_style_key", "key"),
-        Index("ix_project_style_visible", "visible"),
-        CheckConstraint("order_index >= 0", name="ck_project_style_order_nonneg"),
-        CheckConstraint("key ~ '^[a-z0-9_]+$'", name="ck_project_style_key_slug"),
-    )
-
-
-class ProjectStyleI18n(Base):
-    __tablename__ = "project_style_i18n"
-
-    style_id = Column(UUID(as_uuid=True), ForeignKey("project_style.id", ondelete="CASCADE"), primary_key=True)
-    locale = Column(LanguageEnumType, primary_key=True)
-    title = Column(String, nullable=False)
-
-    __table_args__ = (
-        UniqueConstraint("style_id", "locale", name="uq_project_style_i18n_style_locale"),
-        Index("ix_project_style_i18n_locale", "locale"),
-    )
-
-
-class ProjectStyleLink(Base):
-    __tablename__ = "project_style_link"
-
-    project_id = Column(UUID(as_uuid=True), ForeignKey("project.id", ondelete="CASCADE"), primary_key=True)
-    style_id = Column(UUID(as_uuid=True), ForeignKey("project_style.id", ondelete="RESTRICT"), primary_key=True)
-
-    project = relationship("Project", back_populates="style_links")
-    style = relationship("ProjectStyle", back_populates="project_links")
-
-    __table_args__ = (
-        Index("ix_project_style_link_project", "project_id"),
-        Index("ix_project_style_link_style", "style_id"),
-        Index("ix_project_style_link_project_order", "project_id", "style_id"),
-    )
-
-
-# ======================================================
 #                        PROJECT
 # ======================================================
 class Project(Base):
@@ -200,6 +116,109 @@ class ProjectI18n(Base):
         Index("ix_project_i18n_locale", "locale"),
         Index("ix_project_i18n_search", "search_vector", postgresql_using="gin"),
     )
+
+
+
+# ======================================================
+#                     PROJECT TYPE
+# ======================================================
+class ProjectType(Base):
+    __tablename__ = "project_type"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    key = Column(String, nullable=False, unique=True)
+    order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
+    visible = Column(Boolean, nullable=False, server_default=sa.text("true"))
+
+    projects = relationship("Project", back_populates="project_type")
+    translations = relationship(
+        "ProjectTypeI18n",
+        back_populates="project_type",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    __table_args__ = (
+        Index("ix_project_type_key", "key"),
+        Index("ix_project_type_visible", "visible"),
+        CheckConstraint("order_index >= 0", name="ck_project_type_order_nonneg"),  
+        CheckConstraint("key ~ '^[a-z0-9_]+$'", name="ck_project_type_key_slug"),  
+
+    )
+
+
+class ProjectTypeI18n(Base):
+    __tablename__ = "project_type_i18n"
+
+    type_id = Column(UUID(as_uuid=True), ForeignKey("project_type.id", ondelete="CASCADE"), primary_key=True)
+    locale = Column(LanguageEnumType, primary_key=True)
+    title = Column(String, nullable=False)
+
+    project_type = relationship("ProjectType", back_populates="translations")
+
+    __table_args__ = (
+        Index("ix_project_type_i18n_locale", "locale"),
+    )
+
+
+
+# ======================================================
+#                     PROJECT STYLE
+# ======================================================
+class ProjectStyle(Base):
+    __tablename__ = "project_style"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    key = Column(String, nullable=False, unique=True)
+    order_index = Column(Integer, nullable=False, server_default=sa.text("0"))
+    visible = Column(Boolean, nullable=False, server_default=sa.text("true"))
+
+    project_links = relationship("ProjectStyleLink", back_populates="style", cascade="all, delete-orphan", lazy="selectin")
+    translations = relationship(
+        "ProjectStyleI18n",
+        back_populates="style",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    __table_args__ = (
+        Index("ix_project_style_key", "key"),
+        Index("ix_project_style_visible", "visible"),
+        CheckConstraint("order_index >= 0", name="ck_project_style_order_nonneg"),
+        CheckConstraint("key ~ '^[a-z0-9_]+$'", name="ck_project_style_key_slug"),
+    )
+
+
+class ProjectStyleI18n(Base):
+    __tablename__ = "project_style_i18n"
+
+    style_id = Column(UUID(as_uuid=True), ForeignKey("project_style.id", ondelete="CASCADE"), primary_key=True)
+    locale = Column(LanguageEnumType, primary_key=True)
+    title = Column(String, nullable=False)
+
+    style = relationship("ProjectStyle", back_populates="translations")
+
+    __table_args__ = (
+        UniqueConstraint("style_id", "locale", name="uq_project_style_i18n_style_locale"),
+        Index("ix_project_style_i18n_locale", "locale"),
+    )
+
+
+class ProjectStyleLink(Base):
+    __tablename__ = "project_style_link"
+
+    project_id = Column(UUID(as_uuid=True), ForeignKey("project.id", ondelete="CASCADE"), primary_key=True)
+    style_id = Column(UUID(as_uuid=True), ForeignKey("project_style.id", ondelete="RESTRICT"), primary_key=True)
+
+    project = relationship("Project", back_populates="style_links")
+    style = relationship("ProjectStyle", back_populates="project_links")
+
+    __table_args__ = (
+        Index("ix_project_style_link_project", "project_id"),
+        Index("ix_project_style_link_style", "style_id"),
+        Index("ix_project_style_link_project_order", "project_id", "style_id"),
+    )
+
 
 
 # ======================================================

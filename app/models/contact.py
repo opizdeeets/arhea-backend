@@ -52,6 +52,7 @@ class ContactMessage(Base):
     updated_at = Column( DateTime(timezone=True), nullable=False,server_default=sa.func.now(),onupdate=sa.func.now())
     message_hash = Column(String(32), nullable=False)
     created_at_date = Column(Date, nullable=False, server_default=sa.func.current_date())
+    
     @validates("message")
     def _sync_message_hash(self, key, value: str) -> str:
         self.message_hash = hashlib.md5(value.encode("utf-8")).hexdigest()
